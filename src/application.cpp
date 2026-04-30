@@ -69,6 +69,10 @@ void Application::handleInput() {
 }
 
 void Application::update(float dt) {
+  if (m_Settings.rotate) {
+    m_Rotation = fmodf(m_Rotation + m_Settings.rotationSpeed, 360.f);
+  }
+
   if (ImGui::GetIO().WantCaptureMouse)
     return;
 
@@ -95,14 +99,15 @@ void Application::draw() {
   BeginMode2D(m_Camera);
   float angle = 360.f / m_Settings.symmetry * DEG2RAD;
   float thickness = m_Settings.lineThickness;
+  float rotation = m_Settings.rotate ? m_Rotation * DEG2RAD : 0.f;
   if (m_Settings.scaleThicknessWithZoom)
     thickness /= m_Camera.zoom;
 
   for (int i = 0; i < m_LineIdx; i++) {
     const Line &line = m_Lines[i];
     for (int j = 0; j < m_Settings.symmetry; j++) {
-      Vector2 lineStart = Vector2Rotate(line.start, angle * j);
-      Vector2 lineEnd = Vector2Rotate(line.end, angle * j);
+      Vector2 lineStart = Vector2Rotate(line.start, angle * j + rotation);
+      Vector2 lineEnd = Vector2Rotate(line.end, angle * j + rotation);
       DrawLineEx(lineStart, lineEnd, thickness, m_Settings.lineColor);
 
       if (m_Settings.enableReflection) {
@@ -136,15 +141,20 @@ void Application::drawSettings() {
     SetTargetFPS(m_Settings.targetFps);
   }
   ImGui::SliderInt("Symmetry", &m_Settings.symmetry, 1, 32);
-  ImGui::SliderFloat("Line Thickness", &m_Settings.lineThickness, 1.f, 10.f);
   ImGui::SliderFloat("Min. Mouse Distance", &m_Settings.minMouseDistance, 0.f,
                      32.f);
+  ImGui::SliderFloat("Line Thickness", &m_Settings.lineThickness, 1.f, 10.f);
   ImGui::Checkbox("Scale Thickness with Zoom",
                   &m_Settings.scaleThicknessWithZoom);
   ImGui::Separator();
 
+  ImGui::Text("Rotation");
+  ImGui::Checkbox("Enable Rotation", &m_Settings.rotate);
+  ImGui::SliderFloat("Speed", &m_Settings.rotationSpeed, 0.1f, 10.f);
+  ImGui::Separator();
+
   ImGui::Text("Reflection");
-  ImGui::Checkbox("Enable", &m_Settings.enableReflection);
+  ImGui::Checkbox("Enable Reflection", &m_Settings.enableReflection);
   ImGui::SliderFloat("Scale X", &m_Settings.reflectionScale.x, -1, 1);
   ImGui::SliderFloat("Scale Y", &m_Settings.reflectionScale.y, -1, 1);
   ImGui::Separator();

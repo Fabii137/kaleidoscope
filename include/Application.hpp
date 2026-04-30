@@ -15,8 +15,10 @@ struct ApplicationSettings {
   int symmetry = 6;
   float lineThickness = 3.f;
   float minMouseDistance = 2.f;
+  float rotationSpeed = 1.f;
   bool enableReflection = true;
   bool scaleThicknessWithZoom = false;
+  bool rotate = false;
 
   ApplicationSettings() = default;
   ApplicationSettings(int screenWidth, int screenHeight) {
@@ -52,5 +54,6 @@ private:
   Vector2 m_Offset{};
   std::optional<Vector2> m_MousePos;
 
+  float m_Rotation{};
   bool m_ShowSettings = false;
 };
