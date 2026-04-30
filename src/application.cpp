@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "rlImGui.h"
+#include <algorithm>
 #include <cstdint>
 
 Application::Application() {}
@@ -56,6 +57,7 @@ void Application::handleInput() {
   if (wheel != 0) {
     constexpr float zoomFactor = 1.1f;
     m_Camera.zoom *= (wheel > 0) ? zoomFactor : (1.0f / zoomFactor);
+    m_Camera.zoom = std::clamp(m_Camera.zoom, 0.01f, 20.f);
   }
 
   if (IsWindowResized()) {
@@ -70,7 +72,7 @@ void Application::handleInput() {
 
 void Application::update(float dt) {
   if (m_Settings.rotate) {
-    m_Rotation = fmodf(m_Rotation + m_Settings.rotationSpeed, 360.f);
+    m_Rotation = fmodf(m_Rotation + m_Settings.rotationSpeed * dt, 360.f);
   }
 
   if (ImGui::GetIO().WantCaptureMouse)
@@ -150,7 +152,7 @@ void Application::drawSettings() {
 
   ImGui::Text("Rotation");
   ImGui::Checkbox("Enable Rotation", &m_Settings.rotate);
-  ImGui::SliderFloat("Speed", &m_Settings.rotationSpeed, 0.1f, 10.f);
+  ImGui::SliderFloat("Speed", &m_Settings.rotationSpeed, 5.f, 500.f);
   ImGui::Separator();
 
   ImGui::Text("Reflection");
