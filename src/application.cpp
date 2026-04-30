@@ -52,6 +52,12 @@ void Application::handleInput() {
     m_MousePos.reset();
   }
 
+  float wheel = GetMouseWheelMove();
+  if (wheel != 0) {
+    constexpr float zoomFactor = 1.1f;
+    m_Camera.zoom *= (wheel > 0) ? zoomFactor : (1.0f / zoomFactor);
+  }
+
   if (IsWindowResized()) {
     int scrWidth = GetScreenWidth();
     int scrHeight = GetScreenHeight();
@@ -71,7 +77,7 @@ void Application::update(float dt) {
     return;
 
   auto prevMousePos = m_MousePos;
-  m_MousePos = GetMousePosition();
+  m_MousePos = GetScreenToWorld2D(GetMousePosition(), m_Camera);
 
   if (!prevMousePos.has_value())
     return;
@@ -81,20 +87,23 @@ void Application::update(float dt) {
     return;
 
   Line &line = m_Lines[m_LineIdx++];
-  line.start = Vector2Subtract(prevMousePos.value(), m_Offset);
-  line.end = Vector2Subtract(m_MousePos.value(), m_Offset);
+  line.start = prevMousePos.value();
+  line.end = m_MousePos.value();
 }
 
 void Application::draw() {
   BeginMode2D(m_Camera);
   float angle = 360.f / m_Settings.symmetry * DEG2RAD;
+  float thickness = m_Settings.lineThickness;
+  if (m_Settings.scaleThicknessWithZoom)
+    thickness /= m_Camera.zoom;
+
   for (int i = 0; i < m_LineIdx; i++) {
     const Line &line = m_Lines[i];
     for (int j = 0; j < m_Settings.symmetry; j++) {
       Vector2 lineStart = Vector2Rotate(line.start, angle * j);
       Vector2 lineEnd = Vector2Rotate(line.end, angle * j);
-      DrawLineEx(lineStart, lineEnd, m_Settings.lineThickness,
-                 m_Settings.lineColor);
+      DrawLineEx(lineStart, lineEnd, thickness, m_Settings.lineColor);
 
       if (m_Settings.enableReflection) {
         // reflected line
@@ -102,8 +111,7 @@ void Application::draw() {
             Vector2Multiply(lineStart, m_Settings.reflectionScale);
         Vector2 refLineEnd =
             Vector2Multiply(lineEnd, m_Settings.reflectionScale);
-        DrawLineEx(refLineStart, refLineEnd, m_Settings.lineThickness,
-                   m_Settings.lineColor);
+        DrawLineEx(refLineStart, refLineEnd, thickness, m_Settings.lineColor);
       }
     }
   }
@@ -120,6 +128,7 @@ void Application::drawSettings() {
   ImGui::Begin("Settings");
 
   ImGui::Text("FPS: %d", GetFPS());
+  ImGui::Text("Zoom: %.2f", m_Camera.zoom);
   ImGui::Separator();
 
   ImGui::Text("General");
@@ -130,14 +139,14 @@ void Application::drawSettings() {
   ImGui::SliderFloat("Line Thickness", &m_Settings.lineThickness, 1.f, 10.f);
   ImGui::SliderFloat("Min. Mouse Distance", &m_Settings.minMouseDistance, 0.f,
                      32.f);
+  ImGui::Checkbox("Scale Thickness with Zoom",
+                  &m_Settings.scaleThicknessWithZoom);
   ImGui::Separator();
 
   ImGui::Text("Reflection");
-  ImGui::Checkbox("Enable Reflection", &m_Settings.enableReflection);
-  ImGui::SliderFloat("Reflection Scale X", &m_Settings.reflectionScale.x, -1,
-                     1);
-  ImGui::SliderFloat("Reflection Scale Y", &m_Settings.reflectionScale.y, -1,
-                     1);
+  ImGui::Checkbox("Enable", &m_Settings.enableReflection);
+  ImGui::SliderFloat("Scale X", &m_Settings.reflectionScale.x, -1, 1);
+  ImGui::SliderFloat("Scale Y", &m_Settings.reflectionScale.y, -1, 1);
   ImGui::Separator();
 
   float bgColor[4];

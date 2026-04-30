@@ -16,6 +16,7 @@ struct ApplicationSettings {
   float lineThickness = 3.f;
   float minMouseDistance = 2.f;
   bool enableReflection = true;
+  bool scaleThicknessWithZoom = false;
 
   ApplicationSettings() = default;
   ApplicationSettings(int screenWidth, int screenHeight) {
