@@ -37,7 +37,10 @@ private:
   void initCamera();
   void handleInput();
   void update(float dt);
+  void updateLines();
+  void updateRotation(float dt);
   void draw();
+  void drawLines();
   void drawSettings();
   void reset();
   static void colorToFloat4(Color c, float *float4);

@@ -56,8 +56,10 @@ void Application::handleInput() {
   float wheel = GetMouseWheelMove();
   if (wheel != 0) {
     constexpr float zoomFactor = 1.1f;
+    constexpr float minZoom = 0.01f;
+    constexpr float maxZoom = 30.f;
     m_Camera.zoom *= (wheel > 0) ? zoomFactor : (1.0f / zoomFactor);
-    m_Camera.zoom = std::clamp(m_Camera.zoom, 0.01f, 20.f);
+    m_Camera.zoom = std::clamp(m_Camera.zoom, minZoom, maxZoom);
   }
 
   if (IsWindowResized()) {
@@ -71,10 +73,11 @@ void Application::handleInput() {
 }
 
 void Application::update(float dt) {
-  if (m_Settings.rotate) {
-    m_Rotation = fmodf(m_Rotation + m_Settings.rotationSpeed * dt, 360.f);
-  }
+  updateLines();
+  updateRotation(dt);
+}
 
+void Application::updateLines() {
   if (ImGui::GetIO().WantCaptureMouse)
     return;
 
@@ -97,7 +100,24 @@ void Application::update(float dt) {
   line.end = m_MousePos.value();
 }
 
+void Application::updateRotation(float dt) {
+  if (m_Settings.rotate) {
+    m_Rotation += m_Settings.rotationSpeed * dt;
+    if (m_Rotation > 360.f)
+      m_Rotation -= 360.f;
+  }
+}
+
 void Application::draw() {
+  drawLines();
+
+  if (m_ShowSettings)
+    drawSettings();
+  else
+    DrawText("Press TAB to open settngs", 20, 20, 12, WHITE);
+}
+
+void Application::drawLines() {
   BeginMode2D(m_Camera);
   float angle = 360.f / m_Settings.symmetry * DEG2RAD;
   float thickness = m_Settings.lineThickness;
@@ -123,11 +143,6 @@ void Application::draw() {
     }
   }
   EndMode2D();
-
-  if (m_ShowSettings)
-    drawSettings();
-  else
-    DrawText("Press TAB to open settngs", 20, 20, 12, WHITE);
 }
 
 void Application::drawSettings() {
