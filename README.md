@@ -2,4 +2,5 @@
 
 Simple Kaleidoscope drawing
 
-<img width="1185" height="876" alt="image" src="https://github.com/user-attachments/assets/0aea6f59-212b-46ad-ba31-09242f864ba6" />
+<img width="1918" height="1050" alt="image" src="https://github.com/user-attachments/assets/c95bdf5d-71e6-44fe-a1bd-cdc887cb0d9a" />
+
