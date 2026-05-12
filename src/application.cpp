@@ -91,10 +91,6 @@ void Application::updateLines() {
   if (!prevMousePos.has_value())
     return;
 
-  if (Vector2Distance(prevMousePos.value(), m_MousePos.value()) <
-      m_Settings.minMouseDistance)
-    return;
-
   Line &line = m_Lines[m_LineIdx++];
   line.start = prevMousePos.value();
   line.end = m_MousePos.value();
@@ -158,8 +154,6 @@ void Application::drawSettings() {
     SetTargetFPS(m_Settings.targetFps);
   }
   ImGui::SliderInt("Symmetry", &m_Settings.symmetry, 1, 32);
-  ImGui::SliderFloat("Min. Mouse Distance", &m_Settings.minMouseDistance, 0.f,
-                     32.f);
   ImGui::SliderFloat("Line Thickness", &m_Settings.lineThickness, 1.f, 10.f);
   ImGui::Checkbox("Scale Thickness with Zoom",
                   &m_Settings.scaleThicknessWithZoom);

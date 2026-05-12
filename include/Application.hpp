@@ -14,7 +14,6 @@ struct ApplicationSettings {
   int targetFps = 60;
   int symmetry = 6;
   float lineThickness = 3.f;
-  float minMouseDistance = 2.f;
   float rotationSpeed = 20.f;
   bool enableReflection = true;
   bool scaleThicknessWithZoom = false;
